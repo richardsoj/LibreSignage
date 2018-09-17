@@ -50,3 +50,22 @@ th {
 tr:nth-child(even) {
 	background-color: $gray-3;
 }
+
+/* Code styling. */
+.sourceCode {
+	padding: $s2;
+	margin: {
+		left: $s4;
+		right: $s4;
+	}
+
+	background-color: $gray-4;
+	border: 1px solid $gray-2;
+	border-radius: 3px;
+}
+
+code {
+	font-size: 1rem !important;
+	font-family: "Inconsolata", monospace !important;
+	color: $red !important;
+}
