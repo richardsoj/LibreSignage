@@ -48,7 +48,8 @@ SRC_NO_COMPILE := $(shell find src \
 SRC_RST := $(shell find src \
 	\( -type f -path 'src/node_modules/*' -prune \) \
 	-o -type f -name '*.rst' -print \
-) README.rst CONTRIBUTING.rst
+)
+SRC_RST_ROOT := README.rst CONTRIBUTING.rst
 
 # SCSS sources.
 SRC_SCSS := $(shell find src \
@@ -91,8 +92,13 @@ js:: initchk $(subst src,dist,$(SRC_JS)); @:
 api:: initchk $(subst src,dist,$(SRC_ENDPOINT)); @:
 config:: initchk dist/common/php/config.php; @:
 libs:: initchk dist/libs; @:
-docs:: initchk $(addprefix dist/doc/rst/,$(notdir $(SRC_RST))) dist/doc/rst/api_index.rst; @:
-htmldocs:: initchk $(addprefix dist/doc/html/,$(notdir $(SRC_RST:.rst=.html))); @:
+docs:: initchk \
+		$(addprefix dist/doc/rst/,$(notdir $(SRC_RST))) \
+		$(addprefix dist/doc/rst/,$(SRC_RST_ROOT)) \
+		dist/doc/rst/api_index.rst; @:
+htmldocs:: initchk \
+		$(addprefix dist/doc/html/,$(notdir $(SRC_RST:.rst=.html))) \
+		$(addprefix dist/doc/html/,$(SRC_RST_ROOT:.rst=.html)); @:
 css:: initchk $(subst src,dist,$(SRC_SCSS:.scss=.css)); @:
 libs:: initchk $(subst $(ROOT)node_modules/,dist/libs/,$(LIBS)); @:
 
@@ -177,22 +183,15 @@ dist/common/php/config.php:: src/common/php/config.php
 	./build/scripts/prep.sh $(INST) $@
 	php -l $@ > /dev/null
 
-# Copy over README.rst.
-dist/doc/rst/README.rst:: README.rst
-	@:
-	$(call status,cp,$<,$@)
-	$(call makedir,$@)
-	cp -p $< $@
-
-# Copy over CONTRIBUTING.rst.
-dist/doc/rst/CONTRIBUTING.rst:: CONTRIBUTING.rst
-	@:
-	$(call status,cp,$<,$@)
-	$(call makedir,$@)
-	cp -p $< $@
-
 # Copy over RST sources.
 dist/doc/rst/%.rst:: src/doc/rst/%.rst
+	@:
+	$(call status,cp,$<,$@)
+	$(call makedir,$@)
+	cp -p $< $@
+
+# Copy over RST sources from the source root.
+$(addprefix dist/doc/rst/,$(SRC_RST_ROOT)): dist/doc/rst/%.rst: %.rst
 	@:
 	$(call status,cp,$<,$@)
 	$(call makedir,$@)
@@ -207,23 +206,15 @@ dist/doc/html/%.html:: src/doc/rst/%.rst
 		pandoc -o $@ -f rst -t html $<
 	fi
 
-# Compile README.rst
-dist/doc/html/README.html:: README.rst
+# Compile RST sources from the source root into HTML.
+$(addprefix dist/doc/html/,$(SRC_RST_ROOT:.rst=.html)):: \
+	dist/doc/html/%.html: %.rst
 	@:
 	if [ ! "$$NOHTMLDOCS" = "y" ] && [ ! "$$NOHTMLDOCS" = "Y" ]; then
 		$(call status,pandoc,$<,$@)
 		$(call makedir,$@)
 		pandoc -o $@ -f rst -t html $<
-	fi
-
-# Compile CONTRIBUTING.rst
-dist/doc/html/CONTRIBUTING.html:: CONTRIBUTING.rst
-	@:
-	if [ ! "$$NOHTMLDOCS" = "y" ] && [ ! "$$NOHTMLDOCS" = "Y" ]; then
-		$(call status,pandoc,$<,$@)
-		$(call makedir,$@)
-		pandoc -o $@ -f rst -t html $<
-	fi
+	fi	
 
 # Generate JavaScript deps.
 dep/%/main.js.dep: src/%/main.js

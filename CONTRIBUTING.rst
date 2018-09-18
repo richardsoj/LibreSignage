@@ -6,8 +6,11 @@ Contributing to LibreSignage
 
 First of all, keep your coding style sane. If you write some code and
 take a look at it afterwards and it looks messy, fix it. This style
-guide has some general directions for writing readable code, but you'll
-still have to use your own brain too.
+guide just has some general directions for writing readable code.
+
+This guide is rather short to make it easy to grasp the main style
+requirements. Please read all the sections if you intend to contribute
+to LibreSignage development.
 
 1.1 JavaScript
 ##############
@@ -17,7 +20,18 @@ still have to use your own brain too.
 
 * Line width is 80 characters **at the most**, but try to keep it a
   bit shorter than that. 70ish characters is a good limit to use.
-* A semicolon (;) is placed after most statements.
+* A semicolon (;) is placed after all statements. Note that function
+  declarations are not statements if they aren't being assigned to
+  a variable, which means you shouldn't add a semicolon after them.
+
+.. code-block::
+
+   function func() {
+       ...
+   }
+
+   let func = function() { ... };
+
 
 1.1.2 Indentation
 *****************
@@ -54,7 +68,7 @@ still have to use your own brain too.
 * No spaces between function names and parentheses.
 * No spaces separating parentheses from arguments
 * Add one space after each comma separating function arguments.
-  This applies in function declarations and when calling functions.
+  This applies to function declarations and when calling functions.
 * The opening curly bracket is always on the same line as the
   statement it belongs to. The closing bracket can be on the
   same line or on another one.
@@ -76,7 +90,7 @@ still have to use your own brain too.
   can be separated on different lines when declaring or calling
   the function.
 * It's often beneficial to use named arguments when calling a
-  function if the function requires many arguments.
+  function that requires many arguments.
 
 .. code-block::
 
@@ -99,6 +113,26 @@ still have to use your own brain too.
        arg2 = true,
        arg3 = 'Value 3'
    );
+
+* You should usually declare local function variables at the
+  beginning of a function. Loop counter variables are an
+  exception; they can be declared in the loop statement.
+  You should only declare variables in the function body if
+  there's a good reason to do so.
+
+.. code-block::
+
+   function factorial(k) {
+       /*
+       *  Calculates the factorial k!.
+       */
+       let ret = 0;
+       for (var i = 1; i <= k; i++) {
+           ret *= i;
+       }
+       return ret;
+   }
+
 
 1.1.4 Conditionals
 ******************
@@ -210,6 +244,8 @@ still have to use your own brain too.
 * Only add comments to the function body when there's a really good
   reason to do that, eg. some non-obvious way to accomplish a specific
   thing. That said, you should always avoid any non-obvious code.
+* To keep comment block style uniform, try to stick to the comment
+  block style that's used in the example below.
 * **No** comment blocks separating different sections in a file. These
   have no use whatsoever. If your source file is so large you think it
   requires sectioning with comments, you should most probably split it
@@ -218,3 +254,20 @@ still have to use your own brain too.
   code and just clutter it.
 * **No** editor modelines. People have different editor configurations
   and source files shouldn't override them.
+
+.. code-block::
+
+   function test() {
+       /*
+       *  It's often a good idea to have a comment block at the
+       *  beginning of functions. You should give a brief description
+       *  about the function ie. what it does, what values it returns
+       *  and whether it throws some special exceptions on errors.
+       */
+       let tmp = null;
+   
+   	   do_stuff();
+   	   tmp = do_stuff_2();
+   
+       return tmp;
+   }
