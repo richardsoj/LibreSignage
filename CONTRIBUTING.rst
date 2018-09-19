@@ -1,6 +1,9 @@
 Contributing to LibreSignage
 ----------------------------
 
+LibreSignage is free and open source software, so contributions are
+welcome. You can contribute by creating pull requests on GitHub.
+
 1 Programming styleguide
 ++++++++++++++++++++++++
 
@@ -149,6 +152,28 @@ to LibreSignage development.
   // Good
   if (type == 'espresso') { ... }
 
+* Split if-statements with multiple long conditions onto multiple
+  lines so that the logical operator (&& and ||) is always at
+  the beginning of a line. This makes it easy to comment out
+  conditions while debugging.
+
+.. code-block::
+
+   if (
+       condition_1
+       || condition_2
+       && condition_3
+   ) {
+       ...
+   }
+
+* Avoid ambiguous conditionals by using parentheses.
+
+.. code-block::
+
+   if (!key in obj) { ... }   // Bad
+   if (!(key in obj)) { ... } // Good
+
 1.1.5 Operators
 ***************
 
@@ -160,9 +185,17 @@ to LibreSignage development.
 
 .. code-block::
 
-  let a = 10 + 4*10;
-  a++;
-  --a;
+   let a = 10 + 4*10;
+   a++;
+   --a;
+
+* Avoid ambiguous expressions by using parentheses.
+
+.. code-block::
+
+   let a = 10;
+   a *= 10+5/7*2;  // Bad
+   a *= 10+(5/7)*2 // Good
 
 1.1.6 Variables, objects and arrays
 ***********************************
