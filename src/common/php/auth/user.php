@@ -29,10 +29,11 @@ class User extends Exportable {
 	const USERNAME_REGEX = '/^[A-Za-z0-9_]+$/';
 	const GROUPS_REGEX = '/^[A-Za-z0-9_]+$/';
 
-	public function __construct($name = NULL) {
+	public function __construct(string $name = NULL) {
 		if (!empty($name)) {
 			// Load userdata for existing users.
-			$this->load($name);
+			$this->set_name($name);
+			$this->load();
 		} else {
 			// Initialize the user quota for new users.
 			$this->quota = new UserQuota();
@@ -47,20 +48,16 @@ class User extends Exportable {
 		return $this->{$name};
 	}
 
-	public function load(string $user) {
+	private function load() {
 		/*
-		*  Load data for the user $user from file.
+		*  Load data for the current user.
 		*/
 		$json = '';
 		$data = NULL;
 		$dir = NULL;
 
-		if (empty($user)) {
-			throw new ArgException('Invalid username.');
-		}
-		$dir = $this->get_data_dir($user);
-		if (!is_dir($dir)) {
-			throw new ArgException("No user named $user.");
+		if (!is_dir($dir = User::get_data_dir($this->user))) {
+			throw new ArgException("No user named {$this->user}.");
 		}
 		$json = file_lock_and_get($dir.'/data.json');
 		if ($json === FALSE) {
@@ -81,7 +78,7 @@ class User extends Exportable {
 		/*
 		*  Remove the currently loaded user from the server.
 		*/
-		$dir = $this->get_data_dir();
+		$dir = User::get_data_dir($this->user);
 		if (!is_dir($dir)) {
 			throw new IntException("Userdata doesn't exist.");
 		}
@@ -96,7 +93,7 @@ class User extends Exportable {
 		*  if the maximum amount of users is exceeded and
 		*  TRUE otherwise.
 		*/
-		$dir = $this->get_data_dir();
+		$dir = User::get_data_dir($this->user);
 		$json = json_encode($this->export(TRUE, TRUE));
 		if (
 			$json === FALSE &&
@@ -114,10 +111,8 @@ class User extends Exportable {
 		return TRUE;
 	}
 
-	function get_data_dir($user = NULL) {
-		$tmp = $user;
-		if ($tmp == NULL) { $tmp = $this->user; }
-		return LIBRESIGNAGE_ROOT.USER_DATA_DIR.'/'.$tmp;
+	private static function get_data_dir(string $user) {
+		return LIBRESIGNAGE_ROOT.USER_DATA_DIR.'/'.$user;
 	}
 
 	public function session_new(
