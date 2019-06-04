@@ -29,18 +29,30 @@ APIEndpoint::GET(
 		'APIAuthModule' => [
 			'cookie_auth' => FALSE
 		],
-		'APIRateLimitModule' => []
+		'APIRateLimitModule' => [],
+		'APIQueryValidatorModule' => [
+			'schema' => [
+				'type' => 'object',
+				'properties' => [
+					'user' => [
+						'type' => 'string'
+					]
+				],
+				'required' => ['user']
+			]
+		]
 	],
 	function($req, $resp, $module_data) {
-		$u = NULL;
-		$user = $module_data['APIAuthModule']['user'];
+		$caller = $module_data['APIAuthModule']['user'];
+		$params = $module_data['APIQueryValidatorModule'];
+		$user = NULL;
 
-		if (!$user->is_in_group('admin')) {
+		if (!$caller->is_in_group('admin')) {
 			throw new APIException(API_E_NOT_AUTHORIZED, "Not authorized.");
 		}
 
 		try {
-			$u = new User($req->query->get('user'));
+			$user = new User($params->user);
 		} catch (ArgException $e) {
 			throw new APIException(
 				API_E_INVALID_REQUEST,
@@ -50,8 +62,8 @@ APIEndpoint::GET(
 
 		return [
 			'user' => [
-				'user' => $u->get_name(),
-				'groups' => $u->get_groups()
+				'user' => $user->get_name(),
+				'groups' => $user->get_groups()
 			]
 		];
 	}
